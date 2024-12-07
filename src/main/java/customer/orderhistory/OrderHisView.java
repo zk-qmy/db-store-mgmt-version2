@@ -1,5 +1,6 @@
 package customer.orderhistory;
 
+import app.App;
 import orders.OrderDetailsDAO;
 import orders.Orders;
 import orders.OrdersDAO;
@@ -41,11 +42,12 @@ public class OrderHisView extends JFrame{
         // Order panel - grid
         orderPan = new JPanel();
         orderPan.setLayout(new BoxLayout(orderPan, BoxLayout.Y_AXIS));
-        orderPan.setBorder(new EmptyBorder(0, 20, 30, 20));
+        //orderPan.setLayout(new GridLayout(0,1,10,30));
+        orderPan.setBorder(new EmptyBorder(0, 10, 30, 10));
         // Scrollable Pane
         JScrollPane scrollPan = new JScrollPane(orderPan);
         scrollPan.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPan.setPreferredSize(new Dimension(600, 400));
+        //scrollPan.setPreferredSize(new Dimension(600, 400));
 
         parentPan.add(controlPan, BorderLayout.SOUTH);
         parentPan.add(scrollPan, BorderLayout.CENTER);
@@ -63,21 +65,36 @@ public class OrderHisView extends JFrame{
         } else {
             for (Orders order : ordersList) {
                 JPanel box = new JPanel();
-                box.setLayout(new GridLayout(1,3));
+                box.setLayout(new GridLayout(1,4));
+                box.setPreferredSize(new Dimension(0, 100));
+                box.setMinimumSize(new Dimension(0, 100)); // Ensure minimum size is respected
+                box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
                 box.setBorder(boxBorder);
 
-                JLabel orderID = new JLabel("Order ID: "+ order.getOrderID());
-                JLabel status = new JLabel("Status: "+ order.getStatus());
-                JLabel total = new JLabel("Total: "+order.getTotal());
+                JLabel orderID = new JLabel("  Order ID: "+ order.getOrderID());
+                JLabel status = new JLabel("  Status: "+ order.getStatus());
+                JLabel total = new JLabel("  Total: "+order.getTotal());
 
                 orderID.setFont(new Font("Arial", Font.BOLD, 18));
                 total.setFont(new Font("Arial", Font.PLAIN, 18));
                 status.setFont(new Font("Arial", Font.BOLD, 18));
                 setStatusColor(status);
 
+                JButton btnReview = null;
+                if (order.getStatus().equals("processed")) {
+                    btnReview = new JButton("Review");
+                    styleButton(btnReview);
+                    btnReview.addActionListener(e -> {
+                        App.getInstance().getOrderHisController().btnReviewAction(order.getOrderID());
+                    });
+                }
+
                 box.add(orderID);
                 box.add(total);
                 box.add(status);
+                if (btnReview != null) {
+                    box.add(btnReview);
+                }
 
                 orderPan.add(box);
             }
@@ -108,5 +125,12 @@ public class OrderHisView extends JFrame{
             default:
                 break;
         }
+    }
+    private void styleButton(JButton btn) {
+        btn.setFont(new Font("Arial", Font.BOLD, 16));
+        btn.setBackground(new Color(70,130,180));
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setPreferredSize(new Dimension(150,40));
     }
 }
