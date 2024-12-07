@@ -44,6 +44,7 @@ public class BrowserController implements ActionListener {
             //open new checkout screen
             App.getInstance().getCartView().setVisible(true);
         } else if (e.getSource() == view.getBtnOrderHis()) {
+            view.dispose();
             App.getInstance().getOrderHisView().setVisible(true);
         } else if (e.getSource() == view.getBtnLogOut()) {
             int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "Logout", JOptionPane.YES_NO_OPTION);
