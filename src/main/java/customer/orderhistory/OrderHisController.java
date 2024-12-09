@@ -21,7 +21,7 @@ public class OrderHisController implements ActionListener{
         view.getBtnCancel().addActionListener(this);
         view.getBtnRefresh().addActionListener(this);
         view.getBtnBack().addActionListener(this);
-        //order = new Orders();
+                //order = new Orders();
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -68,6 +68,17 @@ public class OrderHisController implements ActionListener{
             System.out.println("order list empty!!!");
         }
         view.displayOrders(ordersList);
+    }
+
+    public void btnReviewAction(int orderID){
+        /*   // load a list of product based on orderID
+            // pass in the orderID so that the review can load the product of the right order
+        }*/
+        view.dispose();
+        App.getInstance().getReviewView().setVisible(true);
+        App.getInstance().getReviewView().getCurrentOrderID(orderID);
+        App.getInstance().getReviewController();
+
     }
 
 }

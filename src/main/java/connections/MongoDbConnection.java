@@ -7,12 +7,16 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class MongoDbConnection {
@@ -63,6 +67,9 @@ public class MongoDbConnection {
     }
 
     public MongoDatabase getMongoDatabase(String dbName){
+        if (mongoClient == null) {
+            throw new IllegalStateException("MongoClient is not initialized!");
+        }
         System.out.println("Connected to database: " + dbName);
         return mongoClient.getDatabase(dbName);
     }
@@ -77,6 +84,15 @@ public class MongoDbConnection {
         MongoDbConnection connection = MongoDbConnection.getInstance();
         // Example usage
         MongoDatabase database = connection.getMongoDatabase("db-project2");
-        System.out.println("Connected to database: " + database.getName());
+        //System.out.println("Connected to database: " + database.getName());
+        MongoCollection<Document> collection = database.getCollection("reviews");
+        // Fetch all documents from the collection
+        List<Document> documents = collection.find().into(new ArrayList<>());
+
+        // Print all documents
+        for (Document doc : documents) {
+            System.out.println(doc.toJson());
+        }
+        connection.closeMongoConn();
     }*/
 }

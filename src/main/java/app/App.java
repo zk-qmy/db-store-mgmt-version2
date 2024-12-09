@@ -8,12 +8,14 @@ import admin.productsmgmt.AdProductsController;
 import admin.productsmgmt.AdProductsView;
 import admin.usersmgmt.AdUserController;
 import admin.usersmgmt.AdUserView;
+import com.mongodb.client.MongoDatabase;
 import customer.browser.BrowserController;
 import customer.browser.BrowserView;
 import customer.cart.CartController;
 import customer.cart.CartView;
 import customer.orderhistory.OrderHisController;
 import customer.orderhistory.OrderHisView;
+import customer.reviews.ReviewDAO;
 import orders.OrdersDAO;
 import orders.OrderDetailsDAO;
 import products.ProductsDAO;
@@ -23,6 +25,8 @@ import register.createaccount.RegisterView;
 import register.users.UsersDAO;
 import register.login.LoginController;
 import register.login.LoginView;
+import customer.reviews.ReviewView;
+import customer.reviews.ReviewController;
 
 public class App {
     private static App instance;
@@ -32,11 +36,14 @@ public class App {
     private final OrderDetailsDAO orderDetailsDAO;
     private final CartView cartView;
     private final ProductsDAO productsDAO;
+    private final ReviewDAO reviewDAO;
+
     private final BrowserView browserView;
     private final OrderHisView orderHisView;
     private final HomeScreen homeScreen;
     private final RegisterView registerView;
     private final LoginView loginView;
+    private final ReviewView reviewView;
 
     private final DashBoardView dashBoardView;
     private final AdProductsView adProductsView;
@@ -50,18 +57,25 @@ public class App {
     //private final OrderHisController orderHisController;
     private final CartController cartController;
     private final BrowserController browserController;
+    //private final ReviewController reviewController;
+
     private final AdProductsController adProductsController;
     private final AdUserController adUserController;
     private final AdOrdersController adOrdersController;
     private final DashBoardController dashBoardController;
 
+    private static MongoDatabase database;
+
 
     // Constructor with Dependency Injection
-    private App(UsersDAO usersDAO, OrdersDAO ordersDAO, OrderDetailsDAO orderDetailsDAO, ProductsDAO productsDAO) {
+    private App(UsersDAO usersDAO, OrdersDAO ordersDAO,
+                OrderDetailsDAO orderDetailsDAO, ProductsDAO productsDAO,
+                ReviewDAO reviewDAO) {
         this.usersDAO = usersDAO;
         this.ordersDAO = ordersDAO;
         this.orderDetailsDAO = orderDetailsDAO;
         this.productsDAO = productsDAO;
+        this.reviewDAO = reviewDAO;
 
         this.homeScreen = new HomeScreen();
         this.registerView = new RegisterView();
@@ -74,6 +88,7 @@ public class App {
         this.adOrdersView = new AdOrdersView();
         this.dashBoardView = new DashBoardView();
 
+        this.reviewView = new ReviewView();
 
         // Initialize controllers
         this.homeScreenController = new HomeScreenController(homeScreen);
@@ -92,7 +107,11 @@ public class App {
     public static App getInstance() {
         if (instance == null) {
             // Inject dependencies when creating the App instance
-            instance = new App(new UsersDAO(), new OrdersDAO(), new OrderDetailsDAO(), new ProductsDAO());
+            instance = new App(new UsersDAO(),
+                    new OrdersDAO(),
+                    new OrderDetailsDAO(),
+                    new ProductsDAO(),
+                    new ReviewDAO(database));
         }
         return instance;
     }
@@ -100,6 +119,13 @@ public class App {
     public OrderHisController getOrderHisController(){
         if (Session.getInstance().getCurrentUser() != null) {
             return new OrderHisController(orderHisView, ordersDAO);
+        } else {
+            throw new IllegalStateException("No user login yet!");
+        }
+    }
+    public ReviewController getReviewController(){
+        if (Session.getInstance().getCurrentUser() != null) {
+            return new ReviewController(reviewView, reviewDAO);
         } else {
             throw new IllegalStateException("No user login yet!");
         }
@@ -116,6 +142,7 @@ public class App {
     public HomeScreen getHomeScreen() {
         return homeScreen;
     }
+    public ReviewView getReviewView() {return reviewView;}
     public DashBoardView getDashBoardView(){return dashBoardView;}
     public AdUserView getAdUserView() {return adUserView;}
     public AdOrdersView getAdOrdersView(){return adOrdersView;}
@@ -124,6 +151,6 @@ public class App {
     public static void main(String[] args) {
         App.getInstance().getHomeScreen().setVisible(true);
         // developing view
-        //App.getInstance().getDashBoardView().setVisible(true);
+        //App.getInstance().getReviewView().setVisible(true);
     }
 }

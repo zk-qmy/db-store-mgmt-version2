@@ -85,6 +85,7 @@ public class OrderHisView extends JFrame{
                     btnReview = new JButton("Review");
                     styleButton(btnReview);
                     btnReview.addActionListener(e -> {
+                        System.out.println("orderID at orderhisview screen: "+ order.getOrderID());
                         App.getInstance().getOrderHisController().btnReviewAction(order.getOrderID());
                     });
                 }
