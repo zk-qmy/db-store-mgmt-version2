@@ -1,10 +1,22 @@
 package products;
 
+import customer.reviews.Reviews;
+
+import java.util.List;
+
 public class Products {
     private int productID;
     private String productName;
-    private int quantity;
+    private int stockQuantity;
+    private int orderQuantity;
+    private List<Reviews> reviewsList;
     private double price;
+
+    public int getOrderQuantity(){return orderQuantity;}
+    public void setOrderQuantity(int orderQuantity) {this.orderQuantity = orderQuantity;}
+    public List<Reviews> getProductReviews(){return reviewsList;}
+    public void setProductReviews(List<Reviews> reviewsList){
+            this.reviewsList = reviewsList;}
 
     public int getProductID() {
         return productID;
@@ -31,10 +43,10 @@ public class Products {
     }
 
     public int getStockQuantity() {
-        return quantity;
+        return stockQuantity;
     }
 
-    public void setStockQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
     }
 }

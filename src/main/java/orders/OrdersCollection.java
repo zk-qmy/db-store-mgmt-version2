@@ -95,6 +95,10 @@ public class OrdersCollection{
     }
     // Load an order by orderID
     public Orders loadOrdersByID(ObjectId orderID){
+        if (!(orderID instanceof ObjectId)) {
+            System.out.println("The provided orderID is not of type ObjectId.");
+            return null;
+        }
         Document orderDoc = null;
         try{
             orderDoc = ordersCollection.find(Filters.eq("_id", orderID)).first();
