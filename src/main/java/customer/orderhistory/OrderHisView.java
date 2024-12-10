@@ -1,14 +1,15 @@
 package customer.orderhistory;
 
 import app.App;
-import orders.OrderDetailsDAO;
 import orders.Orders;
-import orders.OrdersDAO;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 public class OrderHisView extends JFrame{
@@ -76,6 +77,16 @@ public class OrderHisView extends JFrame{
                 JLabel total = new JLabel("  Total: "+order.getTotal());
 
                 orderID.setFont(new Font("Arial", Font.BOLD, 18));
+                // Set a tooltip to show the full Order ID on hover
+                orderID.setToolTipText(String.valueOf(order.getOrderID()));
+                // Add MouseListener to allow copying the tooltip content
+                orderID.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        copyToClipboard(orderID.getToolTipText());
+                    }
+                });
+
                 total.setFont(new Font("Arial", Font.PLAIN, 18));
                 status.setFont(new Font("Arial", Font.BOLD, 18));
                 setStatusColor(status);
@@ -100,6 +111,8 @@ public class OrderHisView extends JFrame{
                 orderPan.add(box);
             }
         }
+        // Make sure tooltips are displayed immediately (optional)
+        ToolTipManager.sharedInstance().setInitialDelay(0);
         orderPan.revalidate();;
         orderPan.repaint();
     }
@@ -107,7 +120,13 @@ public class OrderHisView extends JFrame{
     public JButton getBtnCancel() {return btnCancel;}
     public JButton getBtnRefresh(){return btnRefresh;}
     public JButton getBtnBack(){return btnBack;}
-
+    // Method to copy text to clipboard
+    private void copyToClipboard(String text) {
+        StringSelection stringSelection = new StringSelection(text);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, null);
+        JOptionPane.showMessageDialog(this, "Tooltip copied to clipboard!", "Copied", JOptionPane.INFORMATION_MESSAGE);
+    }
     private void setStatusColor(JLabel status){
         String extractedStatus = status.getText().replace("Status: ","").trim().toLowerCase();
         switch(extractedStatus) {

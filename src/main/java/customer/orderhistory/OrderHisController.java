@@ -3,19 +3,23 @@ package customer.orderhistory;
 import app.App;
 import orders.Orders;
 import orders.*;
+import org.bson.types.ObjectId;
 import register.Session;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.PrivilegedAction;
 import java.util.List;
 import javax.swing.*;
 
 public class OrderHisController implements ActionListener{
     private OrderHisView view;
-    private OrdersDAO ordersDao;
+    //private OrdersDAO ordersCollection;
+    private OrdersCollection ordersCollection;
 
-    public OrderHisController(OrderHisView view, OrdersDAO ordersDao) {
+    public OrderHisController(OrderHisView view, OrdersCollection ordersCollection) {
         this.view = view;
-        this.ordersDao = ordersDao;
+        //this.ordersCollection = ordersCollection;
+        this.ordersCollection = ordersCollection;
         loadOrderList();
 
         view.getBtnCancel().addActionListener(this);
@@ -36,22 +40,24 @@ public class OrderHisController implements ActionListener{
     }
 
     public void cancelOrder() { // TO DO: [Fix] add back the quantity to the stock
-        int orderID = 0;
-        String id = JOptionPane.showInputDialog("Enter OrderID: ");
+        String objectIdString = JOptionPane.showInputDialog("Enter OrderID: ");
+        ObjectId orderID;
         try {
-            orderID = Integer.parseInt(id);
-        }catch(NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Invalid Order ID!");
+            orderID = new ObjectId(objectIdString);
+        }catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "Invalid orderID format! Please copy the orderID");
             return;
         }
         int userID = Session.getInstance().getCurrentUser().getUserID();
-        List<Integer> orderIDList = ordersDao.getUserOrderID(userID);
-        if (!orderIDList.contains(orderID)) {
+
+        Orders validOrder = ordersCollection.loadOrdersByID(orderID);
+        if (validOrder == null) {
             JOptionPane.showMessageDialog(null, "orderID does not exist!");
             return;
         }
-        int cancelStatusID = 5; //"canceled"
-        boolean success = ordersDao.updateStatus(orderID, cancelStatusID);
+
+        String cancelStatus = "cancelled"; //"cancelled"
+        boolean success = ordersCollection.updateStatus(orderID, cancelStatus);
         if (success) {
             JOptionPane.showMessageDialog(null, "Canceled successfully!");
             loadOrderList();
@@ -63,17 +69,17 @@ public class OrderHisController implements ActionListener{
 
     public void loadOrderList() {
         int userID = Session.getInstance().getCurrentUser().getUserID();
-        List<Orders> ordersList = ordersDao.loadUserOrders(userID);
-        if (ordersList.isEmpty()) {
+        //List<Orders> ordersList = ordersCollection.loadUserOrders(userID);
+        List<Orders> ordersList = ordersCollection.loadUserOrders(userID);
+        if (ordersList.isEmpty() || ordersList == null) {
             System.out.println("order list empty!!!");
         }
         view.displayOrders(ordersList);
     }
 
-    public void btnReviewAction(int orderID){
-        /*   // load a list of product based on orderID
-            // pass in the orderID so that the review can load the product of the right order
-        }*/
+    public void btnReviewAction(ObjectId orderID){
+        // load a list of product based on orderID
+        // pass in the orderID so that the review can load the product of the right order
         view.dispose();
         App.getInstance().getReviewView().setVisible(true);
         App.getInstance().getReviewView().getCurrentOrderID(orderID);

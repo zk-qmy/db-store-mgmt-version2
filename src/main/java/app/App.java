@@ -9,15 +9,15 @@ import admin.productsmgmt.AdProductsView;
 import admin.usersmgmt.AdUserController;
 import admin.usersmgmt.AdUserView;
 import com.mongodb.client.MongoDatabase;
+import connections.MongoDbConnection;
 import customer.browser.BrowserController;
 import customer.browser.BrowserView;
-import customer.cart.CartController;
+import customer.cart.CartControllerMG;
 import customer.cart.CartView;
 import customer.orderhistory.OrderHisController;
 import customer.orderhistory.OrderHisView;
 import customer.reviews.ReviewDAO;
-import orders.OrdersDAO;
-import orders.OrderDetailsDAO;
+import orders.OrdersCollection;
 import products.ProductsDAO;
 import register.Session;
 import register.createaccount.RegisterController;
@@ -32,11 +32,12 @@ public class App {
     private static App instance;
     // Main components
     private final UsersDAO usersDAO;
-    private final OrdersDAO ordersDAO;
-    private final OrderDetailsDAO orderDetailsDAO;
+    //private final OrdersDAO ordersDAO;
+    //private final OrderDetailsDAO orderDetailsDAO;
     private final CartView cartView;
     private final ProductsDAO productsDAO;
     private final ReviewDAO reviewDAO;
+    private final OrdersCollection ordersCollection;
 
     private final BrowserView browserView;
     private final OrderHisView orderHisView;
@@ -55,27 +56,30 @@ public class App {
     private final RegisterController registerController;
     private final LoginController loginController;
     //private final OrderHisController orderHisController;
-    private final CartController cartController;
+    // => private final CartController cartController;
     private final BrowserController browserController;
     //private final ReviewController reviewController;
+    private final CartControllerMG cartControllerMG;
 
     private final AdProductsController adProductsController;
-    private final AdUserController adUserController;
-    private final AdOrdersController adOrdersController;
+    /*private final AdUserController adUserController;
+    private final AdOrdersController adOrdersController;*/
     private final DashBoardController dashBoardController;
 
-    private static MongoDatabase database;
 
+    private static MongoDatabase database = MongoDbConnection.getInstance().getMongoDatabase("db-project2");
 
     // Constructor with Dependency Injection
-    private App(UsersDAO usersDAO, OrdersDAO ordersDAO,
-                OrderDetailsDAO orderDetailsDAO, ProductsDAO productsDAO,
-                ReviewDAO reviewDAO) {
+    private App(UsersDAO usersDAO,
+                ProductsDAO productsDAO,
+                ReviewDAO reviewDAO,
+                OrdersCollection ordersCollection) {
         this.usersDAO = usersDAO;
-        this.ordersDAO = ordersDAO;
-        this.orderDetailsDAO = orderDetailsDAO;
+        //this.ordersDAO = ordersDAO;
+        //this.orderDetailsDAO = orderDetailsDAO;
         this.productsDAO = productsDAO;
         this.reviewDAO = reviewDAO;
+        this.ordersCollection = ordersCollection;
 
         this.homeScreen = new HomeScreen();
         this.registerView = new RegisterView();
@@ -95,11 +99,13 @@ public class App {
         this.registerController = new RegisterController(registerView, usersDAO, homeScreen);
         this.loginController = new LoginController(loginView, usersDAO, homeScreen);
         this.browserController = new BrowserController(browserView, productsDAO);
-        //this.orderHisController = new OrderHisController(orderHisView, ordersDAO, orderDetailsDAO);
-        this.cartController = new CartController(cartView, orderDetailsDAO, productsDAO);
+
+        //=>this.cartController = new CartController(cartView, orderDetailsDAO, productsDAO);
+        this.cartControllerMG = new CartControllerMG(cartView, ordersCollection, productsDAO, reviewDAO);
+
         this.adProductsController = new AdProductsController(adProductsView, productsDAO);
-        this.adUserController = new AdUserController(adUserView, usersDAO, ordersDAO);
-        this.adOrdersController = new AdOrdersController(adOrdersView, ordersDAO);
+        /*this.adUserController = new AdUserController(adUserView, usersDAO, ordersDAO);
+        this.adOrdersController = new AdOrdersController(adOrdersView, ordersDAO);*/
         this.dashBoardController = new DashBoardController(dashBoardView, productsDAO);
 
     }
@@ -108,17 +114,17 @@ public class App {
         if (instance == null) {
             // Inject dependencies when creating the App instance
             instance = new App(new UsersDAO(),
-                    new OrdersDAO(),
-                    new OrderDetailsDAO(),
                     new ProductsDAO(),
-                    new ReviewDAO(database));
+                    new ReviewDAO(database),
+                    new OrdersCollection(database));
         }
         return instance;
     }
 
     public OrderHisController getOrderHisController(){
         if (Session.getInstance().getCurrentUser() != null) {
-            return new OrderHisController(orderHisView, ordersDAO);
+            return new OrderHisController(orderHisView, ordersCollection);
+            //=>return new OrderHisController(orderHisView, ordersDAO);
         } else {
             throw new IllegalStateException("No user login yet!");
         }

@@ -1,17 +1,29 @@
 package orders;
 
+import org.bson.types.ObjectId;
+import register.users.Users;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Orders {
-    private int id;
-    private int cusID;
+    private ObjectId id;
+    //private ObjectId cusID;
+    private int userID;
     private String status;
     private double total;
     private List<OrderDetails> lines;
     private String ctmName;
     private String address;
     private String phone;
+    private LocalDateTime createdTime;
+
+    public LocalDateTime getCreatedTime(){return createdTime;}
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
+    }
 
     public Orders() {
         lines = new ArrayList<>();
@@ -46,11 +58,11 @@ public class Orders {
         return status;
     }
 
-    public int getCusID() {
-        return cusID;
+    public int getUserID() {
+        return userID;
     }
 
-    public int getOrderID() {
+    public ObjectId getOrderID() {
         return id;
     }
 
@@ -62,11 +74,11 @@ public class Orders {
         this.total = total;
     }
 
-    public void setCusID(int cusID) {
-        this.cusID = cusID;
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
-    public void setOrderId(int id) {
+    public void setOrderId(ObjectId id) {
         this.id = id;
     }
 
@@ -76,6 +88,7 @@ public class Orders {
     public void removeLine(OrderDetails line) {
         lines.remove(line);
     }
+    public void setOrderLines(List<OrderDetails> lines){this.lines = lines;}
     public List<OrderDetails> getLines() {
         return lines;
     }

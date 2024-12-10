@@ -1,5 +1,6 @@
 package orders;
 
+//import connections.MongoDbConnection;
 import connections.MySQLConnection;
 import customer.cart.Cart;
 import customer.cart.CartLines;
@@ -9,7 +10,6 @@ import java.sql.*;
 public class OrderDetailsDAO {
     private Connection connection;
     public OrderDetailsDAO() {
-
     }
     // Load all (OrderDetails)
     // Find an OrderDetail
@@ -39,8 +39,6 @@ public class OrderDetailsDAO {
                 stmt.setInt(1, orderID);
                 stmt.setInt(2, line.getProductID());
                 stmt.setInt(3, line.getOrderQuantity());
-                //stmt.setDouble(5, line.getCost());
-
                 stmt.executeUpdate();
             }
             stmt.close();
