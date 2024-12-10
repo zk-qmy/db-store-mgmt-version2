@@ -4,6 +4,9 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class AdOrdersView extends JFrame {
     private JButton btnRefresh = new JButton("Refresh page");
@@ -37,6 +40,7 @@ public class AdOrdersView extends JFrame {
         };
         table = new JTable(tableModel);
         table.setRowHeight(30);
+        addToolTip(table);
 
         /*JScrollPane scrollPane = new JScrollPane(table);
         tablePan.add(scrollPane);*/
@@ -98,5 +102,46 @@ public class AdOrdersView extends JFrame {
     public DefaultTableModel getTableModel() {
         return tableModel;
     }
+    private void addToolTip(JTable table){
+        // Enable tooltip for the table
+        this.table.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = AdOrdersView.this.table.rowAtPoint(e.getPoint());
+                int column = AdOrdersView.this.table.columnAtPoint(e.getPoint());
 
+                if (column == 0 && row != -1) { // Only show tooltip for ID column
+                    Object value = AdOrdersView.this.table.getValueAt(row, column);
+                    if (value != null) {
+                        AdOrdersView.this.table.setToolTipText("Click to copy: " + value.toString());
+                    } else {
+                        AdOrdersView.this.table.setToolTipText(null);
+                    }
+                } else {
+                    AdOrdersView.this.table.setToolTipText(null);
+                }
+            }
+        });
+
+        // Add mouse listener for copying on click
+        this.table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = AdOrdersView.this.table.rowAtPoint(e.getPoint());
+                int column = AdOrdersView.this.table.columnAtPoint(e.getPoint());
+
+                if (column == 0 && row != -1) { // Only handle clicks on the ID column
+                    Object value = AdOrdersView.this.table.getValueAt(row, column);
+                    if (value != null) {
+                        // Copy the value to the clipboard
+                        StringSelection stringSelection = new StringSelection(value.toString());
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
+
+                        // Show a confirmation dialog
+                        JOptionPane.showMessageDialog(null, "Copied to clipboard: " + value, "Copied", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+            }
+        });
+    }
 }

@@ -2,21 +2,24 @@ package admin.ordersmgmt;
 
 import app.App;
 import orders.Orders;
-import orders.OrdersDAO;
-import register.Session;
+import orders.OrdersCollection;
+import org.bson.types.ObjectId;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.List;
 
 public class AdOrdersController implements ActionListener {
     private AdOrdersView view;
-    private OrdersDAO ordersDAO;
+    //private OrdersDAO ordersDAO;
+    private OrdersCollection ordersCollection;
 
-    public AdOrdersController(AdOrdersView view, OrdersDAO ordersDAO) {
+    public AdOrdersController(AdOrdersView view, OrdersCollection ordersCollection) {
         this.view = view;
-        this.ordersDAO = ordersDAO;
+        //this.ordersCollection = ordersCollection;
+        this.ordersCollection = ordersCollection;
         displayOrders();
 
         view.getBtnAddOrder().addActionListener(this);
@@ -42,13 +45,18 @@ public class AdOrdersController implements ActionListener {
     }
 
     public void displayOrders(){
-        List<Orders> orderList = ordersDAO.loadAllOrders();
+        List<Orders> orderList = ordersCollection.loadAllOrders();
+        //debug
+        if(orderList == null| orderList.isEmpty()){
+            System.out.println("AdOrdersController: Empty orderList!");
+        }
+        //
         view.getTableModel().setRowCount(0);
 
         for (Orders order : orderList) {
             view.getTableModel().addRow(new Object[] {
                     order.getOrderID(),
-                    order.getCusID(),
+                    order.getUserID(),
                     order.getCtmName(),
                     order.getTotal(),
                     order.getStatus(),
@@ -58,26 +66,24 @@ public class AdOrdersController implements ActionListener {
         }
     }
     public void deleteOrder(){
-        int orderID = 0;
-        String id = JOptionPane.showInputDialog(null, "Enter ID of the order you want to delete: ");
-        try{
-            orderID = Integer.parseInt(id);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Invalid orderID");
+        String idString = JOptionPane.showInputDialog(null, "Paste ID of the order you want to delete: ");
+        ObjectId orderID;
+        try {
+            orderID = new ObjectId(idString);
+        }catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "Invalid orderID format! Please copy the orderID");
             return;
         }
-        // check if orderID exist
-        List<Integer> orderIDList = ordersDAO.getAllorderID();
-        if (!orderIDList.contains(orderID)) {
-            JOptionPane.showMessageDialog(null, "Order ID does not exist!");
+        if(!validOrderID(orderID)){
             return;
-        }
+        };
         // check if this order is not cancelled
         checkStatus(orderID);
 
     }
-    private void checkStatus(int orderID){
-        String dbStatus = ordersDAO.getStatusbyOrderID(orderID);
+    private void checkStatus(ObjectId orderID){
+        Orders targetOrder = ordersCollection.loadOrdersByID(orderID);
+        String dbStatus = targetOrder.getStatus();
         if (dbStatus == null || dbStatus.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Cannot find Order Status!");
             return;
@@ -87,42 +93,41 @@ public class AdOrdersController implements ActionListener {
                     "This Order is being " + dbStatus + ". Do you still want to delete? ",
                         "Delete", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                ordersDAO.deleteOrder(orderID);
+                ordersCollection.deleteOrder(orderID);
                 displayOrders();
             }
         } else {
-            ordersDAO.deleteOrder(orderID);
+            ordersCollection.deleteOrder(orderID);
             displayOrders();
         }
     }
     public void updateOrder(){
-        int orderID = 0;
-        List<Integer> orderIDList = ordersDAO.getAllorderID();
-        String id = JOptionPane.showInputDialog(null, "Enter orderID: ");
+        // orderID input
+        String objectIdString = JOptionPane.showInputDialog("Paste orderID here: ");
+        ObjectId orderID;
         try {
-            orderID = Integer.parseInt(id);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Invalid orderID!");
+            orderID = new ObjectId(objectIdString);
+        }catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "Invalid orderID format! Please copy the orderID");
             return;
         }
-        if(!orderIDList.contains(orderID)) {
-            JOptionPane.showMessageDialog(null, "OrderID does not exist!");
+        if(!validOrderID(orderID)){
             return;
-        }
-        int statusID = 0;
+        };
+
+        // status input
         String status = JOptionPane.showInputDialog(null,
-                "Enter order statusID: \n 1. approved \n 2. pending \n 3. shipped \n 4. processed \n 5. cancelled");
-        try {
-            statusID = Integer.parseInt(status);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Invalid statusID!");
+                "Enter order status: \n 1. approved \n 2. pending \n 3. shipped \n 4. processed \n 5. cancelled");
+        if (status == null){
+            JOptionPane.showMessageDialog(null, "Please write down the status!");
             return;
         }
-        if (!isValidStatus(statusID)) {
-            JOptionPane.showMessageDialog(null, "Invalid status!");
+        status = status.toLowerCase();
+        if(isNotValidStatus(status)){
+            JOptionPane.showMessageDialog(null,"Invalid status!");
             return;
-        }
-        boolean success = ordersDAO.updateStatus(orderID, statusID);
+        };
+        boolean success = ordersCollection.updateStatus(orderID, status);
         if(success) {
             JOptionPane.showMessageDialog(null, "Status updated");
             displayOrders();
@@ -130,23 +135,18 @@ public class AdOrdersController implements ActionListener {
             JOptionPane.showMessageDialog(null, "Failed to update status!");
         }
     }
-    private boolean isValidStatus(int statusID) {
-        List<Integer> statusIDList = ordersDAO.getAllStatusID();
-        return statusIDList.contains(statusID);
+    private boolean isNotValidStatus(String status) {
+        // Convert array to a list
+        List<String> validStatus = Arrays.asList("approved", "pending", "shipped", "processed", "cancelled");
+        return !validStatus.contains(status);
     }
-    /*
-    private boolean isValidStatus(String status) {
-        String[] statusList = {"pending", "approved", "shipped", "canceled"};
-        if (status == null || status.isEmpty()) {
+    private boolean validOrderID(ObjectId orderID){
+        Orders validOrder = ordersCollection.loadOrdersByID(orderID);
+        if (validOrder == null) {
+            JOptionPane.showMessageDialog(null, "orderID does not exist!");
             return false;
         }
-        for (String validStatus : statusList) {
-            if (validStatus.equalsIgnoreCase(status)) {
-                return true;
-            }
-        }
-        return false;
-    }*/
-
+        return true;
+    }
 
 }

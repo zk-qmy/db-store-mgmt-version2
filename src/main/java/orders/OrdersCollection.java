@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.DeleteResult;
 import customer.cart.CartLines;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -16,21 +17,22 @@ import java.util.List;
 
 public class OrdersCollection{
     private final MongoCollection<Document> ordersCollection;
+    private final MongoCollection<Document> userProfilesCollection;
 
     public OrdersCollection(MongoDatabase database){
         this.ordersCollection = database.getCollection("orders");
+        this.userProfilesCollection = database.getCollection("userProfiles");
     }
     // Load all orders
     public List<Orders> loadAllOrders() {
         List<Orders> ordersList = new ArrayList<>();
         try {
-            // Retrieve all documents from the collection
+            // Retrieve all documents from the orders collection
             FindIterable<Document> orderDocs = ordersCollection.find();
 
             for (Document orderDoc : orderDocs) {
-                // print out data to debug
-                System.out.println(orderDoc.toJson());
-
+                // DEBUG: print out data to debug
+                //System.out.println(orderDoc.toJson());
 
                 Orders order = new Orders();
                 // Set order details from the document
@@ -48,12 +50,21 @@ public class OrdersCollection{
                     for (Document detailDoc : orderDetailDocs) {
                         OrderDetails orderDetails = new OrderDetails();
                         orderDetails.setProductID(detailDoc.getInteger("productID"));
-                        orderDetails.setOrderQuantity(detailDoc.getInteger("orderQuantity")); // Corrected field name from "quantity" to "orderQuantity"
+                        orderDetails.setOrderQuantity(detailDoc.getInteger("orderQuantity"));
                         orderDetails.setCost(detailDoc.getDouble("cost"));
                         orderDetailsList.add(orderDetails);
                     }
                 }
                 order.setOrderLines(orderDetailsList);
+                // Retrieve customer info from userProfiles collection
+                Document userDoc = userProfilesCollection.find(Filters.eq("userID", order.getUserID())).first();
+                if (userDoc != null) {
+                    order.setCtmName(userDoc.getString("name"));
+                    order.setAddress(userDoc.getString("address"));
+                    order.setPhone(userDoc.getString("phone"));
+                } else {
+                    System.out.println("No user data found for userID: " + order.getUserID());
+                }
                 // Add the populated order to the orders list
                 ordersList.add(order);
             }
@@ -181,7 +192,20 @@ public class OrdersCollection{
         }
     }
     // Delete Order
-    public void deleteOrder( ObjectId orderID){
-
+    public boolean deleteOrder( ObjectId orderID){
+        try{
+            DeleteResult result = ordersCollection.deleteOne(Filters.eq("_id", orderID));
+            // Check if a document was deleted
+            if (result.getDeletedCount() > 0) {
+                System.out.println("Order with ID " + orderID + " was deleted successfully.");
+                return true;
+            } else {
+                System.out.println("No order found with ID " + orderID);
+                return false;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }
