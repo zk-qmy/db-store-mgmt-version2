@@ -10,6 +10,7 @@ import admin.usersmgmt.AdUserController;
 import admin.usersmgmt.AdUserView;
 import com.mongodb.client.MongoDatabase;
 import connections.MongoDbConnection;
+import connections.RedisConnection;
 import customer.browser.BrowserController;
 import customer.browser.BrowserView;
 import customer.cart.CartControllerMG;
@@ -62,12 +63,13 @@ public class App {
     private final CartControllerMG cartControllerMG;
 
     private final AdProductsController adProductsController;
-    /*private final AdUserController adUserController;
-    private final AdOrdersController adOrdersController;*/
+    private final AdUserController adUserController;
+    private final AdOrdersController adOrdersController;
     private final DashBoardController dashBoardController;
 
 
     private static MongoDatabase database = MongoDbConnection.getInstance().getMongoDatabase("db-project2");
+    private static RedisConnection redisConnection = RedisConnection.getInstance();
 
     // Constructor with Dependency Injection
     private App(UsersDAO usersDAO,
@@ -104,9 +106,9 @@ public class App {
         this.cartControllerMG = new CartControllerMG(cartView, ordersCollection, productsDAO, reviewDAO);
 
         this.adProductsController = new AdProductsController(adProductsView, productsDAO);
-        /*this.adUserController = new AdUserController(adUserView, usersDAO, ordersDAO);
-        this.adOrdersController = new AdOrdersController(adOrdersView, ordersDAO);*/
-        this.dashBoardController = new DashBoardController(dashBoardView, productsDAO);
+        this.adUserController = new AdUserController(adUserView, usersDAO, ordersCollection);
+        this.adOrdersController = new AdOrdersController(adOrdersView, ordersCollection, reviewDAO);
+        this.dashBoardController = new DashBoardController(dashBoardView, productsDAO, ordersCollection);
 
     }
 
@@ -116,7 +118,7 @@ public class App {
             instance = new App(new UsersDAO(),
                     new ProductsDAO(),
                     new ReviewDAO(database),
-                    new OrdersCollection(database));
+                    new OrdersCollection(database, redisConnection));
         }
         return instance;
     }

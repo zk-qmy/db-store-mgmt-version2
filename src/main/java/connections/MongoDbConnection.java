@@ -80,6 +80,10 @@ public class MongoDbConnection {
             System.out.println("MongoDB connection closed!");
         }
     }
+
+    public MongoClient getMongoClient(){
+        return mongoClient;
+    }
     /*public static void main(String[] args) {
         MongoDbConnection connection = MongoDbConnection.getInstance();
         // Example usage

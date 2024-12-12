@@ -10,7 +10,8 @@ import java.util.Map;
 public class DashBoardView extends JFrame {
     private JPanel mainPanel, sidebarPanel, contentPanel, productInfoPanel, userInfoPanel, saleInfoPanel;
     private JButton btnManageUsers, btnManageOrders, btnRefresh, btnLogout, btnManageProducts;
-    private JLabel dashboardTitle, saleLabel;
+    private JLabel dashboardTitle, saleLabel, bestSellingLabel, bestSellingTitleLabel ;
+    //private String bestSellingText;
 
     public DashBoardView() {
         // Frame settings
@@ -51,11 +52,19 @@ public class DashBoardView extends JFrame {
         productInfoPanel = new JPanel();
         userInfoPanel = new JPanel();
         saleInfoPanel = new JPanel();
+        // Redis panel
+        //bestSellingPanel = new JPanel();
 
         // Set layout and borders for info panels
         productInfoPanel.setLayout(new BoxLayout(productInfoPanel, BoxLayout.Y_AXIS));
         userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS));
         saleInfoPanel.setLayout(new BoxLayout(saleInfoPanel, BoxLayout.X_AXIS));
+
+        bestSellingTitleLabel = new JLabel("Best Selling Product:");
+        bestSellingTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        bestSellingLabel = new JLabel("Init text");
+        productInfoPanel.add(bestSellingTitleLabel);
+        productInfoPanel.add(bestSellingLabel);
 
         // init borders
         Border lineBorder = BorderFactory.createLineBorder(Color.BLACK, 2);
@@ -128,7 +137,15 @@ public class DashBoardView extends JFrame {
     public JButton getBtnRefresh(){return btnRefresh;}
 
     public void displayProductInfo(Map<String, Integer> categCount){
-        productInfoPanel.removeAll();
+        // Remove all existing product labels, but keep the best-selling labels
+        Component[] components = productInfoPanel.getComponents();
+        for (Component comp : components) {
+            if (!(comp instanceof JLabel && (comp == bestSellingLabel || comp == bestSellingTitleLabel))) {
+                productInfoPanel.remove(comp);
+            }
+        }
+
+        //productInfoPanel.removeAll();
         JLabel title = new JLabel("Total Products: ");
         title.setFont(new Font("Arial", Font.BOLD, 20));
         productInfoPanel.add(title);
@@ -172,5 +189,12 @@ public class DashBoardView extends JFrame {
             System.out.println("Session cleared!");
             App.getInstance().getHomeScreen().setVisible(true);  // Replace with login screen
         }
+    }
+
+    public void displayBestSelling(String bestSellingText){
+        bestSellingLabel.setText(bestSellingText);
+        bestSellingLabel.setFont(new Font("Arial", Font.PLAIN, 15));
+        productInfoPanel.revalidate();
+        productInfoPanel.repaint();
     }
 }

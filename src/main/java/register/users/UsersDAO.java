@@ -225,7 +225,7 @@ public class UsersDAO {
                     "WHERE Users.id = ?"; //AND Status.statusName NOT IN ('cancelled', 'shipped') ";
 
         List<Orders> ordersList = new ArrayList<>();
-        try {
+        /*try {
             connection = MySQLConnection.getInstance().getSQLConnection();
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1,userID);
@@ -240,7 +240,7 @@ public class UsersDAO {
             return null;
         } finally {
             MySQLConnection.getInstance().closeSQLConn(connection);
-        }
+        }*/
         return ordersList;
     }
 

@@ -2,7 +2,6 @@ package customer.reviews;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -18,11 +17,11 @@ import java.util.Map;
 
 
 public class ReviewView extends JFrame {
-    private JButton btnBack = new JButton("Back");
-    private JButton btnSubmit = new JButton("Submit All");
-    private JPanel reviewPan;
-    public int currentOrderID;
-    public Map<ObjectId, JTextArea> reviewTextAreas = new HashMap<>();
+    private final JButton btnBack = new JButton("Back");
+    private final JButton btnSubmit = new JButton("Submit All");
+    private final JPanel reviewPan;
+    private ObjectId currentOrderID;
+    private Map<ObjectId, JTextArea> reviewTextAreas = new HashMap<>();
 
     public ReviewView() {
         this.setTitle("Share your review on our products!");
@@ -60,14 +59,12 @@ public class ReviewView extends JFrame {
         this.getContentPane().add(parentPan, BorderLayout.CENTER);
         this.getContentPane().add(labelTit, BorderLayout.NORTH);
     }
-    public void getCurrentOrderID(int orderID){
+    public void getCurrentOrderID(ObjectId orderID){
         currentOrderID = orderID;
         System.out.println("currentOrderID: " + currentOrderID);
     }
-    public void displayProductsForReview(List<Document> reviewByOrderList){
+    public void displayProductsForReview(List<Reviews> reviewByOrderList){
         reviewPan.removeAll();
-        //debug
-        System.out.println("Removed previous components!");
 
         Border boxBorder = BorderFactory.createLineBorder(Color.BLACK, 2);
         if (reviewByOrderList == null || reviewByOrderList.isEmpty() ) {
@@ -75,7 +72,7 @@ public class ReviewView extends JFrame {
             emptyList.setAlignmentX(Component.CENTER_ALIGNMENT);
             reviewPan.add(emptyList);
         } else {
-            for (Document review : reviewByOrderList) {
+            for (Reviews review : reviewByOrderList) {
                 JPanel box = new JPanel();
                 box.setLayout(new GridLayout(1,3));
                 box.setPreferredSize(new Dimension(0, 100));
@@ -83,15 +80,15 @@ public class ReviewView extends JFrame {
                 box.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
                 box.setBorder(boxBorder);
 
-                int productID = review.getInteger("productID");
-                String reviewText = review.getString("reviewText");
-                ObjectId reviewID = review.getObjectId("_id");
+                int productID = review.getProductID();
+                String reviewText = review.getReviewText();
+                ObjectId reviewID = review.getReviewID();
 
                 // Product ID Label
                 JLabel productIDLabel = new JLabel("Product ID: " + productID);
                 productIDLabel.setFont(new Font("Arial", Font.BOLD, 18));
                 // Review Text Area
-                JTextArea reviewTextArea = new JTextArea(reviewText != null ? reviewText : "Enter your review here!");
+                JTextArea reviewTextArea = new JTextArea();//reviewText != null ? reviewText : "Enter your review here!");
                 reviewTextArea.setLineWrap(true);
                 reviewTextArea.setWrapStyleWord(true);
                 reviewTextArea.setEditable(true);
@@ -103,27 +100,26 @@ public class ReviewView extends JFrame {
                 box.add(reviewScrollPane);
 
                 reviewPan.add(box);
-                System.out.println("Added review box!");
                 reviewTextAreas.put(reviewID, reviewTextArea);
             }
         }
-        reviewPan.revalidate();;
+        reviewPan.revalidate();
         reviewPan.repaint();
         reviewPan.setVisible(true);
-        System.out.println("Repainted!");
-
     }
     public JButton getBtnBack(){return btnBack;}
     public JButton getBtnSubmit(){return btnSubmit;}
+    public ObjectId getCurrentOrderID() {
+        return currentOrderID;
+    }
+    public Map<ObjectId, JTextArea> getReviewTextAreas() {
+        return reviewTextAreas;
+    }
+    public void setReviewTextAreas(Map<ObjectId, JTextArea> newReviewTextAreas){
+        this.reviewTextAreas = newReviewTextAreas;
+    }
 
-    public Map<ObjectId, String> collectReview() {
-        Map <ObjectId, String> reviews = new HashMap<>();
-        for (Map.Entry<ObjectId, JTextArea> entry : reviewTextAreas.entrySet()) {
-            //int productID = entry.getKey();
-            String reviewText = entry.getValue().getText();
-            ObjectId reviewID = entry.getKey();
-            reviews.put(reviewID, reviewText);
-        }
-        return reviews;
+    public JPanel getReviewPan() {
+        return reviewPan;
     }
 }

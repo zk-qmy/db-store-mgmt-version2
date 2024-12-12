@@ -7,21 +7,28 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
+import connections.RedisConnection;
 import customer.cart.CartLines;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import redis.clients.jedis.UnifiedJedis;
 import register.users.Users;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.List;
 
 public class OrdersCollection{
     private final MongoCollection<Document> ordersCollection;
     private final MongoCollection<Document> userProfilesCollection;
+    //private final RedisConnection redisConnection;
+    private final UnifiedJedis jedis;
 
-    public OrdersCollection(MongoDatabase database){
+    public OrdersCollection(MongoDatabase database, RedisConnection redisConnection){
         this.ordersCollection = database.getCollection("orders");
         this.userProfilesCollection = database.getCollection("userProfiles");
+        //this.redisConnection = redisConnection;
+        this.jedis = redisConnection.getJedis();
     }
     // Load all orders
     public List<Orders> loadAllOrders() {
@@ -157,6 +164,9 @@ public class OrdersCollection{
             //MongoCollection<Document> ordersCollection = database.getCollection("orders");
             ordersCollection.insertOne(mongoSession, orderDoc);
 
+            // update redis sales
+            updateRedisSales(jedis, orderDoc);
+
             autoID = (ObjectId) orderDoc.get("_id");
             System.out.println("Auto generated ID: " + autoID);
         } catch (Exception e){
@@ -164,6 +174,32 @@ public class OrdersCollection{
             return null;
         }
         return autoID;
+    }
+    // Update Redis sale count
+    private void updateRedisSales(UnifiedJedis jedis, Document order){
+        List<Document> orderDetails = (List<Document>) order.get("orderDetails");
+        for (Document orderDetail : orderDetails) {
+            int productID = orderDetail.getInteger("productID");
+            int quantity = orderDetail.getInteger("orderQuantity");
+            // increase count
+            jedis.hincrBy("product_sales", String.valueOf(productID), quantity);
+            // Retrieve and print the updated sales count
+            String updatedCount = jedis.hget("product_sales", String.valueOf(productID));
+            System.out.println("Product ID: " + productID + ", Sales Count: " + updatedCount);
+        }
+    }
+
+    // Get bestselling product
+    public String getBestSellingProduct() {
+        String bestSellingProduct = jedis.hgetAll("product_sales").entrySet().stream()
+                .max((entry1, entry2) -> Integer.compare(
+                        Integer.parseInt(entry1.getValue()),
+                        Integer.parseInt(entry2.getValue())))
+                .map(entry -> "Product ID: " + entry.getKey() + ", Sales: " + entry.getValue())
+                .orElse("No products sold yet");
+
+        System.out.println("Best-Selling Product: " + bestSellingProduct);
+        return bestSellingProduct;
     }
     // Get all orderID of a user
     public List<ObjectId> getUserOrderID(int userID){

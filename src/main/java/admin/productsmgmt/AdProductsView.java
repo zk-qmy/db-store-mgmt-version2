@@ -1,9 +1,6 @@
 package admin.productsmgmt;
 
-import orders.OrderDetailsDAO;
-import orders.OrdersDAO;
 import products.Products;
-import products.ProductsDAO;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.Border;

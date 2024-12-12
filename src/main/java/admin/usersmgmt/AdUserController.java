@@ -2,7 +2,8 @@ package admin.usersmgmt;
 
 import app.App;
 import orders.Orders;
-import orders.OrdersDAO;
+import orders.OrdersCollection;
+import org.bson.types.ObjectId;
 import register.users.Users;
 import register.users.UsersDAO;
 import javax.swing.*;
@@ -13,12 +14,13 @@ import java.util.List;
 public class AdUserController implements ActionListener {
     private AdUserView view;
     private UsersDAO usersDAO;
-    private OrdersDAO ordersDAO;
+    private OrdersCollection ordersCollection;
+    // private OrdersDAO ordersCollection;
 
-    public AdUserController(AdUserView view, UsersDAO usersDAO, OrdersDAO ordersDAO){
+    public AdUserController(AdUserView view, UsersDAO usersDAO, OrdersCollection ordersCollection){
         this.view = view;
         this.usersDAO = usersDAO;
-        this.ordersDAO = ordersDAO;
+        this.ordersCollection = ordersCollection;
         displayUsers();
 
         view.getBtnAddUser().addActionListener(this);
@@ -184,8 +186,8 @@ public class AdUserController implements ActionListener {
             if (confirm == JOptionPane.YES_OPTION) {
                 // delete order, then delete user
                 for (Orders order: ordersList) {
-                    int orderID = order.getOrderID();
-                    ordersDAO.deleteOrder(orderID);
+                    ObjectId orderID = order.getOrderID();
+                    ordersCollection.deleteOrder(orderID);
                 }
             } else if (confirm == JOptionPane.NO_OPTION) { // add this to avoid causing error with database
                 return false;

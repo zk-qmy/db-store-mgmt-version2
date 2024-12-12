@@ -1,6 +1,7 @@
 package admin.ordersmgmt;
 
 import app.App;
+import customer.reviews.ReviewDAO;
 import orders.Orders;
 import orders.OrdersCollection;
 import org.bson.types.ObjectId;
@@ -15,11 +16,12 @@ public class AdOrdersController implements ActionListener {
     private AdOrdersView view;
     //private OrdersDAO ordersDAO;
     private OrdersCollection ordersCollection;
+    private ReviewDAO reviewDAO;
 
-    public AdOrdersController(AdOrdersView view, OrdersCollection ordersCollection) {
+    public AdOrdersController(AdOrdersView view, OrdersCollection ordersCollection, ReviewDAO reviewDAO) {
         this.view = view;
-        //this.ordersCollection = ordersCollection;
         this.ordersCollection = ordersCollection;
+        this.reviewDAO = reviewDAO;
         displayOrders();
 
         view.getBtnAddOrder().addActionListener(this);
@@ -94,6 +96,8 @@ public class AdOrdersController implements ActionListener {
                         "Delete", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 ordersCollection.deleteOrder(orderID);
+                // delete its coresponding review.
+                reviewDAO.deleteReview(orderID);
                 displayOrders();
             }
         } else {

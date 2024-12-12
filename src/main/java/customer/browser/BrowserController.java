@@ -2,7 +2,6 @@ package customer.browser;
 import app.App;
 import customer.cart.CartView;
 import orders.OrderDetailsDAO;
-import orders.OrdersDAO;
 import products.ProductsDAO;
 import products.Products;
 import java.awt.event.ActionEvent;

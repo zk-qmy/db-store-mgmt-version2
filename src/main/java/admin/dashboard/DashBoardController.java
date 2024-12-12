@@ -1,5 +1,6 @@
 package admin.dashboard;
 
+import orders.OrdersCollection;
 import products.ProductsDAO;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,10 +9,14 @@ import java.util.Map;
 public class DashBoardController implements ActionListener {
     private DashBoardView view;
     private ProductsDAO productsDAO;
-    public DashBoardController ( DashBoardView view, ProductsDAO productsDAO){
+    private OrdersCollection ordersCollection;
+
+    public DashBoardController ( DashBoardView view, ProductsDAO productsDAO, OrdersCollection ordersCollection){
         this.view = view;
         this.productsDAO = productsDAO;
+        this.ordersCollection = ordersCollection;
 
+        loadBestSellingText();
         loadProductCount();
         loadUserCount();
         loadSales();
@@ -40,5 +45,9 @@ public class DashBoardController implements ActionListener {
     public void loadSales(){
         double totalSales = productsDAO.getTotalSales();
         view.displaySales(totalSales);
+    }
+    public void loadBestSellingText(){
+        String bestSellingText = ordersCollection.getBestSellingProduct();
+        view.displayBestSelling(bestSellingText);
     }
 }

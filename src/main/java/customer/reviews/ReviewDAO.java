@@ -3,31 +3,30 @@ package customer.reviews;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import connections.MongoDbConnection;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.*;
 
 public class ReviewDAO {
-    MongoDatabase database;
+    private final MongoCollection<Document> reviewCollection;
+    //private final MongoDatabase database;
+
     public ReviewDAO(MongoDatabase database) {
-        this.database = database != null? database : MongoDbConnection.getInstance().getMongoDatabase("db-project2");
+        this.reviewCollection = database.getCollection("reviews");
     }
+
     // add review
-    public boolean addReview(String productID, String userID, String orderID, String reviewText) {
-        //MongoDatabase database = null;
+    public boolean addReview(int productID, int userID, ObjectId orderID, String reviewText) {
         try {
-            //database = MongoDbConnection.getInstance().getMongoDatabase("db-project2");
-            MongoCollection<Document> collection = database.getCollection("reviews");
-            Document review = new Document("productID", productID)
+            Document review = new Document ("productID", productID)
                     .append("userID", userID)
                     .append("orderID", orderID)
                     .append("reviewText", reviewText)
-                    .append("timestamp", System.currentTimeMillis());
-            collection.insertOne(review);
+                    .append("timestamp",  new Date());
+            reviewCollection.insertOne(review);
             System.out.println("Review added to MongoDb!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -35,17 +34,30 @@ public class ReviewDAO {
         }
         return true;
     }
+
     // load review based on an order of a customer (orderID, and userID)
-    public List<Document> loadReviewByOrder(int orderID, int userID) {
+    public List<Reviews> loadReviewByOrder(ObjectId orderID, int userID) {
         //MongoDatabase database = null;
-        List<Document> reviewByOrderList = new ArrayList<>();
+        List<Reviews> reviewByOrderList = new ArrayList<>();
         try {
-            //database = MongoDbConnection.getInstance().getMongoDatabase("db-project2");
-            MongoCollection<Document> collection = database.getCollection("reviews");
-            collection.find(Filters.and(
+            List<Document> reviewDocs = reviewCollection.find(Filters.and(
                     Filters.eq("orderID", orderID),
                     Filters.eq("userID", userID)
-            )).into(reviewByOrderList);
+            )).into(new ArrayList<>());
+
+            // Map docs with objects
+            for (Document doc : reviewDocs) {
+                Reviews review = new Reviews();
+                review.setReviewID(doc.getObjectId("_id"));
+                review.setOrderID(doc.getObjectId("orderID"));
+                review.setProductID(doc.getInteger("productID"));
+                review.setCustomerID(doc.getInteger("userID"));
+                review.setReviewText(doc.getString("reviewText"));
+                review.setTimestamp(doc.getDate("timestamp"));
+
+                reviewByOrderList.add(review);
+            }
+
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -56,15 +68,13 @@ public class ReviewDAO {
     // update review
     public boolean updateReviews(Map<ObjectId, String> collectedReviews) {
         try {
-            MongoCollection<Document> collection = database.getCollection("reviews");
-
             for (Map.Entry<ObjectId, String> entry : collectedReviews.entrySet()) {
                 String updatedText = entry.getValue();
                 ObjectId reviewID = entry.getKey();
                 // Create update query to find the document using productID and currentOrderID
                 Document updateQuery = new Document("_id", reviewID);
                 Document updateFields = new Document("$set", new Document("reviewText", updatedText));
-                collection.updateOne(updateQuery, updateFields);
+                reviewCollection.updateOne(updateQuery, updateFields);
                 System.out.println("Updated review!");
             }
         } catch (Exception e){
@@ -74,4 +84,22 @@ public class ReviewDAO {
         return true;
     }
     // delete review
+    public boolean deleteReview(ObjectId orderID){
+        try{
+            Document filter = new Document("orderID", orderID);
+            // Attempt to delete the document
+            long deletedCount = reviewCollection.deleteOne(filter).getDeletedCount();
+            if (deletedCount > 0) {
+                System.out.println("Review with orderID " + orderID + " has been deleted.");
+                return true;
+            } else {
+                System.out.println("No review found with orderID " + orderID);
+                return false;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
