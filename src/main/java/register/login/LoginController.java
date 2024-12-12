@@ -45,9 +45,14 @@ public class LoginController implements ActionListener {
             homeScreen.dispose();
             if (currentUser.getRoleID() == 1) { // admin
                 App.getInstance().getDashBoardView().setVisible(true);
+                App.getInstance().getAdUserController();
+                App.getInstance().getAdOrdersController();
             } else if (currentUser.getRoleID() == 2) { // customer
                 App.getInstance().getBrowserView().setVisible(true);
                 App.getInstance().getOrderHisController();
+            } else if (currentUser.getRoleID() == 3) {//cashier
+                App.getInstance().getAdOrdersView().setVisible(true);
+                App.getInstance().getAdOrdersController();
             }
             /*Users user = usersDAO.loadUser(username, password);
 
