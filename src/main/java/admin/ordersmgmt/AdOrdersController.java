@@ -7,7 +7,6 @@ import orders.OrdersCollection;
 import org.bson.types.ObjectId;
 import register.Session;
 import register.users.Users;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -58,7 +57,7 @@ public class AdOrdersController implements ActionListener {
         List<Orders> orderList = ordersCollection.loadAllOrders();
         //debug
         if(orderList == null| orderList.isEmpty()){
-            System.out.println("AdOrdersController: Empty orderList!");
+            //System.out.println("AdOrdersController: Empty orderList!");
         }
         //
         view.getTableModel().setRowCount(0);
@@ -165,7 +164,7 @@ public class AdOrdersController implements ActionListener {
         Users currentUser = Session.getInstance().getCurrentUser();
 
         if (currentUser != null) {
-            System.out.println(currentUser.getRoleID());
+            //System.out.println(currentUser.getRoleID());
             int currentRoleID = currentUser.getRoleID();
             if (currentRoleID == 3){
                 view.getBtnBack().setVisible(false);
@@ -178,7 +177,7 @@ public class AdOrdersController implements ActionListener {
         Users currentUser = Session.getInstance().getCurrentUser();
 
         if (currentUser != null) {
-            System.out.println(currentUser.getRoleID());
+            //System.out.println(currentUser.getRoleID());
             int currentRoleID = currentUser.getRoleID();
             if (currentRoleID == 1){
                 view.getBtnLogOut().setVisible(false);

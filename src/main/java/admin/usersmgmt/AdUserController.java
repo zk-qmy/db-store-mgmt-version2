@@ -15,7 +15,6 @@ public class AdUserController implements ActionListener {
     private AdUserView view;
     private UsersDAO usersDAO;
     private OrdersCollection ordersCollection;
-    // private OrdersDAO ordersCollection;
 
     public AdUserController(AdUserView view, UsersDAO usersDAO, OrdersCollection ordersCollection){
         this.view = view;
@@ -32,7 +31,7 @@ public class AdUserController implements ActionListener {
 
     public void actionPerformed (ActionEvent e) {
         if (e.getSource() == view.getBtnAddUser()) {
-            System.out.println("user add Button triggered");
+            //System.out.println("user add Button triggered");
             boolean add=true;
             addNupdateUser(add);
         } else if (e.getSource() == view.getBtnUpdateUser()) {

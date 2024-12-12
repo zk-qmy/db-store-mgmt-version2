@@ -22,7 +22,7 @@ public class AdOrdersView extends JFrame {
     private JPanel controlPan;
 
     public AdOrdersView() {
-        System.out.println("INIT ADORDERSVIEW SCREEN");
+        //System.out.println("INIT ADORDERSVIEW SCREEN");
         this.setTitle("Order Management");
         this.setSize(1020, 800);
         this.setLayout(new BorderLayout());

@@ -38,9 +38,6 @@ public class AdUserView extends JFrame {
          table = new JTable(tableModel);
          table.setRowHeight(30);
 
-         /*JScrollPane scrollPane = new JScrollPane(table);
-        tablePan.add(scrollPane);*/
-
          JScrollPane scrollPan = new JScrollPane(table);
          scrollPan.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
          tablePan.add(scrollPan, BorderLayout.CENTER);

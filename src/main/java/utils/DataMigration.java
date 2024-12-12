@@ -1,4 +1,4 @@
-package migration;
+package utils;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -24,10 +24,10 @@ public class DataMigration {
        try{
            mongoDatabase = MongoDbConnection.getInstance().getMongoDatabase("db-project2");
            // Migrate Users
-            migrateUsers(sqlConnection, mongoDatabase);
+            //migrateUsers(sqlConnection, mongoDatabase);
             // Migrate Orders
             migrateOrders(sqlConnection, mongoDatabase);
-       } catch (SQLException e) {
+       } catch (Exception e) {
             e.printStackTrace();
        } finally {
             MongoDbConnection.getInstance().closeMongoConn();
@@ -49,9 +49,9 @@ public class DataMigration {
 
             while (resultSet.next()) {
                 Document userDoc = new Document()
-                        .append("_id", resultSet.getInt("id"))
-                        .append("username", resultSet.getString("username"))
-                        .append("password", resultSet.getString("password"))
+                        .append("userID", resultSet.getInt("id"))
+                        //.append("username", resultSet.getString("username"))
+                        //.append("password", resultSet.getString("password"))
                         .append("name", resultSet.getString("name"))
                         .append("address", resultSet.getString("address"))
                         .append("phone", resultSet.getString("phone"))
@@ -66,7 +66,7 @@ public class DataMigration {
         System.out.println("Users migrated successfully!");
     }
 
-    private static void migrateOrders(Connection sqlConnection, MongoDatabase mongoDatabase) throws SQLException {
+    private static void migrateOrders(Connection sqlConnection, MongoDatabase mongoDatabase){
         String ordersQuery = """
             SELECT o.id, o.customerID, s.statusName, u.username, u.name
             FROM Orders o
@@ -105,17 +105,20 @@ public class DataMigration {
 
                 // Create Order Document
                 Document orderDoc = new Document()
-                        .append("_id", orderId)
-                        .append("customer", new Document()
+                        //.append("_id", orderId)
+                        .append("userID", orderResultSet.getInt("customerID"))
+                        /*.append("customer", new Document()
                                 .append("id", orderResultSet.getInt("customerID"))
                                 .append("username", orderResultSet.getString("username"))
-                                .append("name", orderResultSet.getString("name")))
+                                .append("name", orderResultSet.getString("name")))*/
                         .append("status", orderResultSet.getString("statusName"))
                         .append("orderDetails", orderDetailsList);
 
                 ordersCollection.insertOne(orderDoc);
             }
+            System.out.println("Orders migrated successfully!");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        System.out.println("Orders migrated successfully!");
     }
 }

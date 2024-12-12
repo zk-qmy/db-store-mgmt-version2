@@ -67,19 +67,6 @@ public class DashBoardView extends JFrame {
         userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS));
         saleInfoPanel.setLayout(new BoxLayout(saleInfoPanel, BoxLayout.X_AXIS));
 
-        /*lastCreatedUserLabel = new JLabel("init new user text!");
-        lastCreatedUserTitleLabel = new JLabel("New User ID:");
-        lastCreatedUserLabel.setFont(new Font("Arial", Font.PLAIN, 15));
-        lastCreatedUserTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        userInfoPanel.add(lastCreatedUserTitleLabel);
-        userInfoPanel.add(lastCreatedUserLabel);
-
-        bestSellingTitleLabel = new JLabel("Best Selling Product:");
-        bestSellingTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        bestSellingLabel = new JLabel("Init text");
-        productInfoPanel.add(bestSellingTitleLabel);
-        productInfoPanel.add(bestSellingLabel);*/
-
         // init borders
         Border lineBorder = BorderFactory.createLineBorder(Color.BLACK, 2);
         Border paddingBorder = BorderFactory.createEmptyBorder(10,10,10,10);
@@ -142,8 +129,6 @@ public class DashBoardView extends JFrame {
             dispose();
             App.getInstance().getAdOrdersView().setVisible(true);
         });
-        /*btnRefresh.addActionListener(e -> {
-        });*/
         btnLogout.addActionListener(e -> logout());
 
     }
@@ -154,12 +139,6 @@ public class DashBoardView extends JFrame {
 
     public void displayProductInfo(Map<String, Integer> categCount, String bestSellingText){
         // Remove all existing product labels, but keep the best-selling labels
-        /*Component[] components = productInfoPanel.getComponents();
-        for (Component comp : components) {
-            if (!(comp instanceof JLabel && (comp == bestSellingLabel || comp == bestSellingTitleLabel))) {
-                productInfoPanel.remove(comp);
-            }
-        }*/
         displayBestSelling(bestSellingText);
         // productInfoPanel.removeAll();
         JLabel title = new JLabel("Total Products: ");
@@ -177,12 +156,6 @@ public class DashBoardView extends JFrame {
     }
 
     public void displayUserInfo (Map<String, Integer> userInfo, String newUserText) {
-        /*Component[] components = userInfoPanel.getComponents();
-        for (Component comp : components) {
-            if (!(comp instanceof JLabel && (comp == lastCreatedUserLabel || comp == lastCreatedUserTitleLabel))) {
-                userInfoPanel.remove(comp);
-            }
-        }*/
         displayNewUser(newUserText);
 
         //userInfoPanel.removeAll();
@@ -230,9 +203,6 @@ public class DashBoardView extends JFrame {
                 productInfoPanel.remove(comp);
             }
         }
-        /*
-        productInfoPanel.revalidate();
-        productInfoPanel.repaint();*/
     }
 
     public void displayNewUser(String newUserText) {
@@ -250,7 +220,5 @@ public class DashBoardView extends JFrame {
                 userInfoPanel.remove(comp);
             }
         }
-        /*userInfoPanel.revalidate();
-        userInfoPanel.repaint();*/
     }
 }

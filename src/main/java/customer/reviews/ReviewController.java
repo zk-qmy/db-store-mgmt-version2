@@ -1,11 +1,8 @@
 package customer.reviews;
 
 import app.App;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import register.Session;
-import register.users.Users;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +15,7 @@ public class ReviewController implements ActionListener {
     private ReviewDAO dao;
 
     public ReviewController(ReviewView view, ReviewDAO dao) {
-        System.out.println("ReviewController init!");
+        //System.out.println("ReviewController init!");
         this.view = view;
         this.dao = dao;
         loadReviewByOrderList();
@@ -29,7 +26,7 @@ public class ReviewController implements ActionListener {
     public void actionPerformed(ActionEvent e){
         if (e.getSource() == view.getBtnBack()){
             view.dispose();
-            System.out.println("back button in review triggered!");
+            //System.out.println("back button in review triggered!");
             App.getInstance().getOrderHisView().setVisible(true);
         } else if (e.getSource() == view.getBtnSubmit()){
             storeReview();
@@ -91,19 +88,19 @@ public class ReviewController implements ActionListener {
     public void loadReviewByOrderList(){
         ObjectId orderID = view.getCurrentOrderID();
         int userID = Session.getInstance().getCurrentUser().getUserID();
-        System.out.println("orderID: " + orderID);
+        //System.out.println("orderID: " + orderID);
 
         List<Reviews> reviewByOrderList = null;
         try{
             // debug
-            System.out.println("loading reviewByOrderList!");
+            //System.out.println("loading reviewByOrderList!");
             //
             reviewByOrderList = dao.loadReviewByOrder(orderID, userID);
         } catch (Exception e) {
             e.printStackTrace();
         }
         if(reviewByOrderList == null || reviewByOrderList.isEmpty()) {
-            System.out.println("reviewOrderList is null!");
+            //System.out.println("reviewOrderList is null!");
         }
         view.displayProductsForReview(reviewByOrderList);
     }
