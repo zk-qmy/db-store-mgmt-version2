@@ -63,13 +63,14 @@ public class App {
     private final CartControllerMG cartControllerMG;
 
     private final AdProductsController adProductsController;
-    private final AdUserController adUserController;
-    private final AdOrdersController adOrdersController;
+    //=> private final AdUserController adUserController;
+    //=>private final AdOrdersController adOrdersController;
     private final DashBoardController dashBoardController;
 
 
     private static MongoDatabase database = MongoDbConnection.getInstance().getMongoDatabase("db-project2");
     private static RedisConnection redisConnection = RedisConnection.getInstance();
+
 
     // Constructor with Dependency Injection
     private App(UsersDAO usersDAO,
@@ -106,16 +107,16 @@ public class App {
         this.cartControllerMG = new CartControllerMG(cartView, ordersCollection, productsDAO, reviewDAO);
 
         this.adProductsController = new AdProductsController(adProductsView, productsDAO);
-        this.adUserController = new AdUserController(adUserView, usersDAO, ordersCollection);
-        this.adOrdersController = new AdOrdersController(adOrdersView, ordersCollection, reviewDAO);
-        this.dashBoardController = new DashBoardController(dashBoardView, productsDAO, ordersCollection);
+        //=>this.adUserController = new AdUserController(adUserView, usersDAO, ordersCollection);
+        //=>this.adOrdersController = new AdOrdersController(adOrdersView, ordersCollection, reviewDAO);
+        this.dashBoardController = new DashBoardController(dashBoardView, productsDAO, ordersCollection, usersDAO);
 
     }
 
     public static App getInstance() {
         if (instance == null) {
             // Inject dependencies when creating the App instance
-            instance = new App(new UsersDAO(),
+            instance = new App(new UsersDAO(redisConnection),
                     new ProductsDAO(),
                     new ReviewDAO(database),
                     new OrdersCollection(database, redisConnection));
@@ -128,6 +129,20 @@ public class App {
             return new OrderHisController(orderHisView, ordersCollection);
             //=>return new OrderHisController(orderHisView, ordersDAO);
         } else {
+            throw new IllegalStateException("No user login yet!");
+        }
+    }
+    public AdOrdersController getAdOrdersController(){
+        if(Session.getInstance().getCurrentUser()!=null) {
+            return new AdOrdersController(adOrdersView, ordersCollection, reviewDAO);
+        } else{
+            throw new IllegalStateException("No user login yet!");
+        }
+    }
+    public AdUserController getAdUserController(){
+        if(Session.getInstance().getCurrentUser()!= null) {
+            return new AdUserController(adUserView, usersDAO, ordersCollection);
+        }else{
             throw new IllegalStateException("No user login yet!");
         }
     }

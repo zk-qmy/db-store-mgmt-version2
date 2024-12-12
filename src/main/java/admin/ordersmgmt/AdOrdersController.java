@@ -5,6 +5,8 @@ import customer.reviews.ReviewDAO;
 import orders.Orders;
 import orders.OrdersCollection;
 import org.bson.types.ObjectId;
+import register.Session;
+import register.users.Users;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -23,12 +25,16 @@ public class AdOrdersController implements ActionListener {
         this.ordersCollection = ordersCollection;
         this.reviewDAO = reviewDAO;
         displayOrders();
+        hideBackButton();
+        hideLogOutButton();
 
         view.getBtnAddOrder().addActionListener(this);
         view.getBtnDeleteOrder().addActionListener(this);
         view.getBtnUpdateOrder().addActionListener(this);
         view.getBtnBack().addActionListener(this);
         view.getBtnRefresh().addActionListener(this);
+        view.getBtnLogOut().addActionListener(this);
+        //System.out.println("INIT ADORDERCONTROLLER");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -43,6 +49,8 @@ public class AdOrdersController implements ActionListener {
             App.getInstance().getDashBoardView().setVisible(true);
         } else if (e.getSource()==view.getBtnRefresh()) {
             displayOrders();
+        } else if(e.getSource() == view.getBtnLogOut()){
+            logout();
         }
     }
 
@@ -151,6 +159,43 @@ public class AdOrdersController implements ActionListener {
             return false;
         }
         return true;
+    }
+
+    private void hideBackButton(){ // hide back button from cashier
+        Users currentUser = Session.getInstance().getCurrentUser();
+
+        if (currentUser != null) {
+            System.out.println(currentUser.getRoleID());
+            int currentRoleID = currentUser.getRoleID();
+            if (currentRoleID == 3){
+                view.getBtnBack().setVisible(false);
+                view.getControlPan().revalidate();
+                view.getControlPan().repaint();
+            }
+        }
+    }
+    private void hideLogOutButton(){ // hide logout button from admin
+        Users currentUser = Session.getInstance().getCurrentUser();
+
+        if (currentUser != null) {
+            System.out.println(currentUser.getRoleID());
+            int currentRoleID = currentUser.getRoleID();
+            if (currentRoleID == 1){
+                view.getBtnLogOut().setVisible(false);
+                view.getControlPan().revalidate();
+                view.getControlPan().repaint();
+            }
+        }
+    }
+    private void logout(){
+        int confirm = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to logout?", "Logout", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            view.dispose();
+            Session.getInstance().clearSession();
+            System.out.println("Session cleared!");
+            App.getInstance().getHomeScreen().setVisible(true);  // Replace with login screen
+        }
     }
 
 }

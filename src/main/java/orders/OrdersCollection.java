@@ -188,6 +188,14 @@ public class OrdersCollection{
             System.out.println("Product ID: " + productID + ", Sales Count: " + updatedCount);
         }
     }
+    public void resetBestSelling(){
+        try {
+            jedis.del("product_sales");  // Delete the entire hash in Redis
+            System.out.println("All product sales have been reset.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     // Get bestselling product
     public String getBestSellingProduct() {

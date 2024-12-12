@@ -85,7 +85,7 @@ public class AdUserController implements ActionListener {
             return;
         }
         int roleID = 0;
-        String roleid = JOptionPane.showInputDialog("Enter roleID:\n 1. Admin \n 2. Customer");
+        String roleid = JOptionPane.showInputDialog("Enter roleID:\n 1. Admin \n 2. Customer \n 3. Cashier");
         try{
             roleID = Integer.parseInt(roleid);
         }catch (NumberFormatException e) {
@@ -161,6 +161,10 @@ public class AdUserController implements ActionListener {
         // if userID = 1 (ultimate admin -> not allow)
         String userid = JOptionPane.showInputDialog("Enter user id that you want to delete: ");
         int userID = 0;
+        if (userid == null) {
+            JOptionPane.showMessageDialog(null, "Please enter userID!");
+            return;
+        }
         try {
             userID = Integer.parseInt(userid);
         } catch(NumberFormatException e) {

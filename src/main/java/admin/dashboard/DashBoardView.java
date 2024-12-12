@@ -10,7 +10,9 @@ import java.util.Map;
 public class DashBoardView extends JFrame {
     private JPanel mainPanel, sidebarPanel, contentPanel, productInfoPanel, userInfoPanel, saleInfoPanel;
     private JButton btnManageUsers, btnManageOrders, btnRefresh, btnLogout, btnManageProducts;
-    private JLabel dashboardTitle, saleLabel, bestSellingLabel, bestSellingTitleLabel ;
+    private JButton btnResetBestSelling, btnResetUserTracker;
+    private JLabel dashboardTitle, saleLabel;//, bestSellingLabel, bestSellingTitleLabel, lastCreatedUserLabel, lastCreatedUserTitleLabel ;
+
     //private String bestSellingText;
 
     public DashBoardView() {
@@ -35,10 +37,15 @@ public class DashBoardView extends JFrame {
         btnRefresh = new JButton("Refresh");
         btnLogout = new JButton("Logout");
 
+        btnResetBestSelling = new JButton("Reset Bestselling");
+        btnResetUserTracker = new JButton("Reset UserTracker");
+
         sidebarPanel.add(btnManageProducts);
         sidebarPanel.add(btnManageUsers);
         sidebarPanel.add(btnManageOrders);
         sidebarPanel.add(btnRefresh);
+        sidebarPanel.add(btnResetBestSelling);
+        sidebarPanel.add(btnResetUserTracker);
         sidebarPanel.add(Box.createVerticalGlue());
         sidebarPanel.add(btnLogout);
 
@@ -60,11 +67,18 @@ public class DashBoardView extends JFrame {
         userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS));
         saleInfoPanel.setLayout(new BoxLayout(saleInfoPanel, BoxLayout.X_AXIS));
 
+        /*lastCreatedUserLabel = new JLabel("init new user text!");
+        lastCreatedUserTitleLabel = new JLabel("New User ID:");
+        lastCreatedUserLabel.setFont(new Font("Arial", Font.PLAIN, 15));
+        lastCreatedUserTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        userInfoPanel.add(lastCreatedUserTitleLabel);
+        userInfoPanel.add(lastCreatedUserLabel);
+
         bestSellingTitleLabel = new JLabel("Best Selling Product:");
         bestSellingTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         bestSellingLabel = new JLabel("Init text");
         productInfoPanel.add(bestSellingTitleLabel);
-        productInfoPanel.add(bestSellingLabel);
+        productInfoPanel.add(bestSellingLabel);*/
 
         // init borders
         Border lineBorder = BorderFactory.createLineBorder(Color.BLACK, 2);
@@ -135,17 +149,19 @@ public class DashBoardView extends JFrame {
     }
 
     public JButton getBtnRefresh(){return btnRefresh;}
+    public JButton getBtnResetBestSelling(){return btnResetBestSelling;}
+    public JButton getBtnResetUserTracker(){return btnResetUserTracker;}
 
-    public void displayProductInfo(Map<String, Integer> categCount){
+    public void displayProductInfo(Map<String, Integer> categCount, String bestSellingText){
         // Remove all existing product labels, but keep the best-selling labels
-        Component[] components = productInfoPanel.getComponents();
+        /*Component[] components = productInfoPanel.getComponents();
         for (Component comp : components) {
             if (!(comp instanceof JLabel && (comp == bestSellingLabel || comp == bestSellingTitleLabel))) {
                 productInfoPanel.remove(comp);
             }
-        }
-
-        //productInfoPanel.removeAll();
+        }*/
+        displayBestSelling(bestSellingText);
+        // productInfoPanel.removeAll();
         JLabel title = new JLabel("Total Products: ");
         title.setFont(new Font("Arial", Font.BOLD, 20));
         productInfoPanel.add(title);
@@ -160,8 +176,16 @@ public class DashBoardView extends JFrame {
         //contentPanel.add(productInfoPanel);
     }
 
-    public void displayUserInfo (Map<String, Integer> userInfo) {
-        userInfoPanel.removeAll();
+    public void displayUserInfo (Map<String, Integer> userInfo, String newUserText) {
+        /*Component[] components = userInfoPanel.getComponents();
+        for (Component comp : components) {
+            if (!(comp instanceof JLabel && (comp == lastCreatedUserLabel || comp == lastCreatedUserTitleLabel))) {
+                userInfoPanel.remove(comp);
+            }
+        }*/
+        displayNewUser(newUserText);
+
+        //userInfoPanel.removeAll();
         JLabel title = new JLabel("Total Users: ");
         title.setFont(new Font("Arial", Font.BOLD, 20));
         userInfoPanel.add(title);
@@ -192,9 +216,41 @@ public class DashBoardView extends JFrame {
     }
 
     public void displayBestSelling(String bestSellingText){
+        JLabel bestSellingTitleLabel = new JLabel("Best Selling Product:");
+        bestSellingTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel bestSellingLabel = new JLabel("Init text");
+        productInfoPanel.add(bestSellingTitleLabel);
+        productInfoPanel.add(bestSellingLabel);
         bestSellingLabel.setText(bestSellingText);
         bestSellingLabel.setFont(new Font("Arial", Font.PLAIN, 15));
+
+        Component[] components = productInfoPanel.getComponents();
+        for (Component comp : components) {
+            if (!(comp instanceof JLabel && (comp == bestSellingLabel || comp == bestSellingTitleLabel))) {
+                productInfoPanel.remove(comp);
+            }
+        }
+        /*
         productInfoPanel.revalidate();
-        productInfoPanel.repaint();
+        productInfoPanel.repaint();*/
+    }
+
+    public void displayNewUser(String newUserText) {
+        JLabel lastCreatedUserLabel = new JLabel("init new user text!");
+        JLabel lastCreatedUserTitleLabel = new JLabel("New User ID:");
+        lastCreatedUserLabel.setFont(new Font("Arial", Font.PLAIN, 15));
+        lastCreatedUserTitleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        userInfoPanel.add(lastCreatedUserTitleLabel);
+        userInfoPanel.add(lastCreatedUserLabel);
+        lastCreatedUserLabel.setText(newUserText);
+
+        Component[] components = userInfoPanel.getComponents();
+        for (Component comp : components) {
+            if (!(comp instanceof JLabel && (comp == lastCreatedUserLabel || comp == lastCreatedUserTitleLabel))) {
+                userInfoPanel.remove(comp);
+            }
+        }
+        /*userInfoPanel.revalidate();
+        userInfoPanel.repaint();*/
     }
 }

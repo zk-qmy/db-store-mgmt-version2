@@ -1,20 +1,26 @@
 package register.users;
 
 import connections.MySQLConnection;
+import connections.RedisConnection;
 import orders.Orders;
+import redis.clients.jedis.UnifiedJedis;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UsersDAO {
+    private UnifiedJedis jedis;
+    public UsersDAO(RedisConnection redisConnection){
+        this.jedis = redisConnection.getJedis();
+    }
     // Add user (ad + cus)
     public boolean addUser(String name, String username, String password, String address, String phone, int roleID) {
         Connection connection = null;
         try {
             String query = "INSERT INTO Users(username, password, name, address, phone, roleID) VALUES (?,?,?,?,?,?)";
             connection = MySQLConnection.getInstance().getSQLConnection();
-            PreparedStatement statement = connection.prepareStatement(query);
+            PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, username);
             statement.setString(2,password);
             statement.setString(3, name);
@@ -22,6 +28,21 @@ public class UsersDAO {
             statement.setString(5,phone);
             statement.setInt(6, roleID);
             statement.executeUpdate();
+
+            // Add userID to Redis if the user has the role of customer (roleID = 2)
+            try (ResultSet rs = statement.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int newUserID = rs.getInt(1);  // Get the generated user ID
+                    if (roleID == 2) {  // Only track customers
+                        jedis.rpush("user_ids", String.valueOf(newUserID));
+                        System.out.println("Most recent Customer Created: ID = " + newUserID);
+                    }
+                    return true;  // User added successfully
+                }
+            }catch ( SQLException e){
+                e.printStackTrace();
+                return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -29,6 +50,28 @@ public class UsersDAO {
             MySQLConnection.getInstance().closeSQLConn(connection);
         }
         return true;
+    }
+    public String getNewCreatedUserID(){
+        List<String> userIDList = jedis.lrange("user_ids", -1, -1);
+        // Check if the list is not empty and print the latest element
+        String latestUserID = "No user yet!";
+        if (!userIDList.isEmpty()) {
+            latestUserID = userIDList.get(0);
+            System.out.println("Latest user ID added: " + userIDList.get(0));
+        } else {
+            System.out.println("The list is empty.");
+        }
+        return latestUserID;
+    }
+    public void resetUserCounter() {
+        try {
+            // Delete the "user_ids" list from Redis to reset it
+            jedis.del("user_ids");
+            System.out.println("User IDs list has been reset.");
+        } catch (Exception e) {
+            System.out.println("Error resetting the user IDs list in Redis.");
+            e.printStackTrace();
+        }
     }
     // Find user (ad)
     public Users loadUser(String username, String password) {
@@ -83,23 +126,37 @@ public class UsersDAO {
     // delete user (ad)
     public boolean deleteUser(int userID) {
         Connection connection = null;
+        //String lastCreatedUserID = jedis.get("last_created_userID");
+        List<String> userIDList = jedis.lrange("user_ids", -1, -1);
+        // Check if the list is not empty and print the latest element
+        String lastCreatedUserID = null;
+        if (!userIDList.isEmpty()) {
+            lastCreatedUserID = userIDList.get(0);
+            System.out.println("Latest user ID added: " + userIDList.get(0));
+        } else {
+            System.out.println("The list is empty.");
+        }
+
         try {
             connection = MySQLConnection.getInstance().getSQLConnection();
             String query = "DELETE FROM Users WHERE id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userID);
+            statement.executeUpdate();
 
-            int rowsDeleted = statement.executeUpdate();
-
-            // Check if any rows were deleted
-            if (rowsDeleted > 0) {
-                System.out.println("User deleted successfully: ID = " + userID);
-                return true;
+            System.out.println("User deleted successfully: ID = " + userID);
+            // Check if the deleted user is the last created user
+            if (String.valueOf(userID).equals(lastCreatedUserID)) {
+                jedis.lrem("user_ids", 0, String.valueOf(userID));
+                /*System.out.println("Removed last created UserID from Redis because it was deleted.");
+                // DEBUG
+                List<String> updatedList = jedis.lrange("user_ids", 0, -1);
+                System.out.println("Updated user IDs list: " + updatedList);*/
+            return true;
             } else {
                 System.out.println("No user found with ID: " + userID);
                 return false;
             }
-
         } catch(SQLException e){
             e.printStackTrace();
             return false;

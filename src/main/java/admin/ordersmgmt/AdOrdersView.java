@@ -1,5 +1,7 @@
 package admin.ordersmgmt;
 
+import register.Session;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
@@ -14,10 +16,13 @@ public class AdOrdersView extends JFrame {
     private JButton btnUpdateOrder = new JButton("Update Order Status");
     private JButton btnDeleteOrder = new JButton("Delete Order");
     private JButton btnBack = new JButton("Back");
+    private JButton btnLogOut = new JButton("LogOut");
     private DefaultTableModel tableModel;
     private JTable table;
+    private JPanel controlPan;
 
     public AdOrdersView() {
+        System.out.println("INIT ADORDERSVIEW SCREEN");
         this.setTitle("Order Management");
         this.setSize(1020, 800);
         this.setLayout(new BorderLayout());
@@ -53,7 +58,7 @@ public class AdOrdersView extends JFrame {
         this.add(tablePan, BorderLayout.CENTER);
         // control panel
 
-        JPanel controlPan = new JPanel();
+        controlPan = new JPanel();
         controlPan.setLayout(new BoxLayout(controlPan, BoxLayout.Y_AXIS));
         controlPan.setBorder(new EmptyBorder(40, 20, 40, 20));
 
@@ -75,6 +80,11 @@ public class AdOrdersView extends JFrame {
         controlPan.add(btnDeleteOrder);
         controlPan.add(Box.createVerticalStrut(10)); // Spacer
         controlPan.add(btnBack);
+
+        controlPan.add(Box.createVerticalGlue());
+        controlPan.add(btnLogOut);
+
+
         this.add(controlPan, BorderLayout.EAST);
         this.getContentPane().add(labelTit, BorderLayout.NORTH);
     }
@@ -97,6 +107,9 @@ public class AdOrdersView extends JFrame {
 
     public JButton getBtnBack(){
         return btnBack;
+    }
+    public JButton getBtnLogOut(){
+        return btnLogOut;
     }
 
     public DefaultTableModel getTableModel() {
@@ -143,5 +156,8 @@ public class AdOrdersView extends JFrame {
                 }
             }
         });
+    }
+    public JPanel getControlPan(){
+        return controlPan;
     }
 }
