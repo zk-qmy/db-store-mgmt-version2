@@ -42,6 +42,9 @@ public class OrderHisController implements ActionListener{
     public void cancelOrder() { // TO DO: [Fix] add back the quantity to the stock
         String objectIdString = JOptionPane.showInputDialog("Enter OrderID: ");
         ObjectId orderID;
+        if(objectIdString==null||objectIdString.isEmpty()){
+            return;
+        }
         try {
             orderID = new ObjectId(objectIdString);
         }catch (IllegalArgumentException e) {
